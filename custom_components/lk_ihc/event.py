@@ -82,7 +82,9 @@ class IHCButtonEvent(IHCEntity, EventEntity):
     @callback
     def _schedule(self, seconds: float, action: Callable[[], None]) -> Callable[[], None]:
         """Call action in some seconds, and return what cancels it."""
-        return async_call_later(self.hass, seconds, lambda _now: action())
+        # Marked as a callback, or Home Assistant runs it in a worker thread, where the entity may
+        # not write its state.
+        return async_call_later(self.hass, seconds, callback(lambda _now: action()))
 
     @callback
     def _apply_value(self, value: Any) -> None:

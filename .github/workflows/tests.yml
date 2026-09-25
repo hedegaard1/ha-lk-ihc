@@ -2,7 +2,7 @@ name: Tests
 
 on:
   push:
-    branches: [main]
+    branches: ["**"]
   pull_request:
   workflow_dispatch:
 
@@ -24,3 +24,6 @@ jobs:
 
       - name: Run the tests
         run: pytest --cov=custom_components/lk_ihc --cov-report=term-missing
+
+      - name: Ruff (temporary, fork only)
+        run: pip install ruff==0.16.7 && ruff check . && ruff format --check .

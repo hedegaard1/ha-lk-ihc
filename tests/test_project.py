@@ -137,6 +137,57 @@ def test_rs485_led_dimmer_channels_are_dimmable_lights():
     assert [resource.ihc_id for resource in project.products[1].resources] == [0x3008]
 
 
+ALARM_PRODUCTS = """
+<utcs><groups><group id="_0x1001" name="Hall">
+  <product_dataline id="_0x2001" product_identifier="_0x210a" name="Smoke detector" position="hall">
+    <dataline_input id="_0x3001" name="Input"/>
+    <dataline_output id="_0x3002" name="Supply"/>
+  </product_dataline>
+  <product_dataline id="_0x2002" product_identifier="_0x2203" name="Siren indoor" position="hall">
+    <dataline_output id="_0x3003" name="Output 80 dB"/>
+    <dataline_output id="_0x3004" name="Output 102 dB"/>
+  </product_dataline>
+  <product_dataline id="_0x2003" product_identifier="_0x2108" name="Status panel" position="board">
+    <dataline_input id="_0x3005" name="Key (top left)"/>
+    <dataline_output id="_0x3006" name="LED (top left)"/>
+  </product_dataline>
+  <product_dataline id="_0x2004" product_identifier="_0x2111" name="Code keypad" position="door">
+    <dataline_output id="_0x3007" name="Status"/>
+    <dataline_input id="_0x3008" name="Output 1"/>
+  </product_dataline>
+  <product_dataline id="_0x2005" product_identifier="_0x2112" name="Tamper circuit" position="house">
+    <dataline_input id="_0x3009" name="Input (NC)"/>
+  </product_dataline>
+</group></groups></utcs>
+"""
+
+
+def test_alarm_products():
+    """The alarm's products get a role and an icon that fit them, and the smoke detector reads the right way round."""
+    project = parse_project(ALARM_PRODUCTS)
+    by_id = {resource.ihc_id: resource for _product, resource in project.resources}
+    # The smoke detector's contact is normally closed, and its supply starts disabled.
+    assert (by_id[0x3001].device_class, by_id[0x3001].inverting) == ("smoke", True)
+    assert (by_id[0x3002].role, by_id[0x3002].enabled_default) == (ResourceRole.SWITCH, False)
+    assert by_id[0x3002].icon == "mdi:restart"
+    assert {by_id[0x3003].icon, by_id[0x3004].icon} == {"mdi:bullhorn"}
+    # The status panel has keys like a wall switch, and lights the alarm drives.
+    assert by_id[0x3005].role is ResourceRole.BUTTON
+    assert (by_id[0x3006].role, by_id[0x3006].icon) == (ResourceRole.SWITCH, "mdi:led-on")
+    # The keypad's inputs are pulses for the alarm blocks, so they stay out of the way.
+    assert (by_id[0x3007].role, by_id[0x3007].icon) == (ResourceRole.SWITCH, "mdi:led-on")
+    assert (by_id[0x3008].role, by_id[0x3008].enabled_default) == (ResourceRole.BINARY_SENSOR, False)
+    assert by_id[0x3008].icon == "mdi:dialpad"
+    assert (by_id[0x3009].device_class, by_id[0x3009].inverting) == ("tamper", True)
+    assert [product.model for product in project.products] == [
+        "Smoke detector",
+        "Siren, indoor",
+        "Status panel",
+        "Code keypad",
+        "Tamper circuit",
+    ]
+
+
 def test_project_without_products():
     """A file with nothing in it parses to an empty project rather than failing."""
     project = parse_project("<utcs><groups><group name='Empty'/></groups></utcs>")

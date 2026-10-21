@@ -95,7 +95,14 @@ PRODUCTS: dict[str, ProductSpec] = {
     "_0x4406": ProductSpec("Wireless combi dimmer, 4 keys", outputs=_DIMMER, inputs=_KEY),
     # Sensors.
     "_0x2109": ProductSpec("Magnet contact", inputs=_sensor("opening", inverting=True)),
-    "_0x210a": ProductSpec("Smoke detector", inputs=_sensor("smoke")),
+    # The smoke detector's contact is normally closed: on means no smoke. Its output is the
+    # detector's supply, which the alarm block cuts briefly to reset it - switched off from Home
+    # Assistant, the detector has no power, so it starts disabled.
+    "_0x210a": ProductSpec(
+        "Smoke detector",
+        inputs=_sensor("smoke", inverting=True),
+        outputs=RoleSpec(ResourceRole.SWITCH, enabled_default=False),
+    ),
     "_0x210c": ProductSpec("Leak detector", inputs=_sensor("moisture")),
     "_0x210e": ProductSpec("PIR sensor", inputs=_sensor("motion")),
     "_0x210f": ProductSpec("PIR sensor, alarm", inputs=_sensor("motion")),
@@ -103,6 +110,17 @@ PRODUCTS: dict[str, ProductSpec] = {
     "_0x2124": ProductSpec("Temperature sensor", inputs=_TEMPERATURE),
     "_0x2135": ProductSpec("Humidity and temperature sensor", inputs=_TEMPERATURE),
     "_0x2136": ProductSpec("Lux and temperature sensor", inputs=_TEMPERATURE),
+    # Alarm products. The alarm function blocks drive their outputs, so they are shown as they are
+    # and seldom worth switching by hand. The keypad's inputs are pulses for the blocks, not keys.
+    "_0x2108": ProductSpec("Status panel", inputs=_KEY, outputs=_RELAY),
+    "_0x2111": ProductSpec(
+        "Code keypad",
+        inputs=RoleSpec(ResourceRole.BINARY_SENSOR, enabled_default=False),
+        outputs=_RELAY,
+    ),
+    "_0x2112": ProductSpec("Tamper circuit", inputs=_sensor("tamper", inverting=True)),
+    "_0x2203": ProductSpec("Siren, indoor", outputs=_RELAY),
+    "_0x2204": ProductSpec("Siren, outdoor", outputs=_RELAY),
 }
 
 # What a resource becomes when its product is not in the catalogue. An output can be switched, so
@@ -137,9 +155,22 @@ _ICONS: dict[ResourceRole, str] = {
 # Products that switch a socket rather than something wired in.
 _OUTLET_PRODUCTS = frozenset({"_0x2201", "_0x4201", "_0x4204"})
 
+# Products whose resources are something other than what their role suggests: a siren is a switch,
+# but it is not a relay. An icon set in the entity's own settings still wins over these.
+_PRODUCT_ICONS: dict[tuple[str, ResourceRole], str] = {
+    ("_0x2203", ResourceRole.SWITCH): "mdi:bullhorn",
+    ("_0x2204", ResourceRole.SWITCH): "mdi:bullhorn",
+    ("_0x2108", ResourceRole.SWITCH): "mdi:led-on",
+    ("_0x2111", ResourceRole.SWITCH): "mdi:led-on",
+    ("_0x2111", ResourceRole.BINARY_SENSOR): "mdi:dialpad",
+    ("_0x210a", ResourceRole.SWITCH): "mdi:restart",
+}
+
 
 def icon_for(identifier: str, role: ResourceRole) -> str | None:
     """Return the icon for a resource, or None to let Home Assistant choose."""
+    if (identifier, role) in _PRODUCT_ICONS:
+        return _PRODUCT_ICONS[identifier, role]
     if role is ResourceRole.SWITCH and identifier in _OUTLET_PRODUCTS:
         return "mdi:power-socket"
     return _ICONS.get(role)

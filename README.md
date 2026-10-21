@@ -154,8 +154,8 @@ skrivebeskyttet, indtil du siger andet: **Konfigurer** på opsætningen, og slå
 | Platform | Fra | Bemærkninger |
 |---|---|---|
 | Lys | Lampeudtag og dæmpere | En dæmper får lysstyrke, et udtag er tændt eller slukket. |
-| Kontakt | Relæer og stikudtag | |
-| Binær sensor | PIR, magnetkontakter, røg, vand, skumring | Med den rigtige enhedsklasse, så Home Assistant viser dem korrekt. |
+| Kontakt | Relæer og stikudtag, sirener, og lysene på statuspanel og kodetastatur | Sirener og lys får deres eget ikon. Røgsensorens forsyning er også en kontakt, men oprettes deaktiveret: slukket fra Home Assistant er røgsensoren uden strøm. |
+| Binær sensor | PIR, magnetkontakter, røg, vand, skumring, sabotagekreds | Med den rigtige enhedsklasse, så Home Assistant viser dem korrekt. Røgsensor og sabotagekreds er sluttede kredse og læses vendt, så «til» betyder røg eller sabotage. |
 | Sensor | Temperatur og andre målte værdier | |
 | Hændelse | Hver tast på hver vægkontakt | Tryk, enkelt- og dobbelttryk, langt tryk og slip — se nedenfor. Det er den del, den indbyggede integration ikke har. |
 

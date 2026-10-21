@@ -9,7 +9,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.lk_ihc.const import CONF_EXPOSE_BUTTONS, CONF_READ_ONLY, DOMAIN
+from custom_components.lk_ihc.const import CONF_BUTTONS_AS_BINARY_SENSORS, CONF_EXPOSE_BUTTONS, CONF_READ_ONLY, DOMAIN
 
 from .conftest import SERIAL
 
@@ -104,13 +104,17 @@ async def test_same_controller_twice(hass: HomeAssistant, fake_controller, confi
 
 
 async def test_options_flow(hass: HomeAssistant, setup_entry: MockConfigEntry):
-    """The options flow saves read-only and the button setting."""
+    """The options flow saves read-only and both button settings."""
     result = await hass.config_entries.options.async_init(setup_entry.entry_id)
     assert result["type"] is FlowResultType.FORM
 
     result = await hass.config_entries.options.async_configure(
-        result["flow_id"], {CONF_READ_ONLY: True, CONF_EXPOSE_BUTTONS: False}
+        result["flow_id"], {CONF_READ_ONLY: True, CONF_EXPOSE_BUTTONS: False, CONF_BUTTONS_AS_BINARY_SENSORS: True}
     )
     await hass.async_block_till_done()
     assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert setup_entry.options == {CONF_READ_ONLY: True, CONF_EXPOSE_BUTTONS: False}
+    assert setup_entry.options == {
+        CONF_READ_ONLY: True,
+        CONF_EXPOSE_BUTTONS: False,
+        CONF_BUTTONS_AS_BINARY_SENSORS: True,
+    }

@@ -8,11 +8,16 @@ DOMAIN: Final = "lk_ihc"
 
 CONF_READ_ONLY: Final = "read_only"
 CONF_EXPOSE_BUTTONS: Final = "expose_buttons"
+CONF_BUTTONS_AS_BINARY_SENSORS: Final = "buttons_as_binary_sensors"
 
 # A new entry starts read only: it shows the whole installation and never sends a command, so an
 # installation can be looked over before anything in the house can be switched from Home Assistant.
 DEFAULT_READ_ONLY: Final = True
 DEFAULT_EXPOSE_BUTTONS: Final = True
+# Off by default: the event entities are Home Assistant's way to show a key. The binary sensors are
+# for installations coming from the IHC beta's manual setup, whose automations and blueprints time
+# how long a key is held from a binary sensor that is on while it is down.
+DEFAULT_BUTTONS_AS_BINARY_SENSORS: Final = False
 
 # Seconds to wait for the controller when connecting or reading the project.
 CONNECT_TIMEOUT: Final = 30

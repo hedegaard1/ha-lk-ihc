@@ -18,8 +18,10 @@ from homeassistant.helpers.selector import (
 
 from . import IHCConfigEntry
 from .const import (
+    CONF_BUTTONS_AS_BINARY_SENSORS,
     CONF_EXPOSE_BUTTONS,
     CONF_READ_ONLY,
+    DEFAULT_BUTTONS_AS_BINARY_SENSORS,
     DEFAULT_EXPOSE_BUTTONS,
     DEFAULT_READ_ONLY,
     DOMAIN,
@@ -134,7 +136,7 @@ class LKIHCConfigFlow(ConfigFlow, domain=DOMAIN):
 
 
 class LKIHCOptionsFlow(OptionsFlow):
-    """Read-only mode, and whether the wall switch keys are exposed."""
+    """Read-only mode, and how the wall switch keys are exposed: as events, binary sensors or both."""
 
     async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Show and save the options."""
@@ -153,6 +155,10 @@ class LKIHCOptionsFlow(OptionsFlow):
                     vol.Required(
                         CONF_EXPOSE_BUTTONS,
                         default=options.get(CONF_EXPOSE_BUTTONS, DEFAULT_EXPOSE_BUTTONS),
+                    ): BooleanSelector(),
+                    vol.Required(
+                        CONF_BUTTONS_AS_BINARY_SENSORS,
+                        default=options.get(CONF_BUTTONS_AS_BINARY_SENSORS, DEFAULT_BUTTONS_AS_BINARY_SENSORS),
                     ): BooleanSelector(),
                 }
             ),

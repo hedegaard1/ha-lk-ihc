@@ -41,11 +41,13 @@
         "title": "IHC options",
         "data": {
           "read_only": "Read-only",
-          "expose_buttons": "Wall switch keys as events"
+          "expose_buttons": "Wall switch keys as events",
+          "buttons_as_binary_sensors": "Wall switch keys as binary sensors"
         },
         "data_description": {
           "read_only": "While this is on, the integration never sends a command to the installation. Entities still show what the house is doing, and any attempt to switch something says so.",
-          "expose_buttons": "Create an event entity for every key on every wall switch, so automations can trigger on a press. The keys keep doing what the installation already uses them for."
+          "expose_buttons": "Create an event entity for every key on every wall switch, so automations can trigger on a press. The keys keep doing what the installation already uses them for.",
+          "buttons_as_binary_sensors": "Also create a binary sensor for every key, on while the key is held. Automations and blueprints written for keys as binary sensors - as the IHC beta's manual setup shows them - then keep working. The keys keep doing what the installation already uses them for."
         }
       }
     }
@@ -116,6 +118,14 @@
               "long_release": "Released after a long press"
             }
           }
+        }
+      }
+    },
+    "binary_sensor": {
+      "key": {
+        "state": {
+          "on": "Pressed",
+          "off": "Released"
         }
       }
     }

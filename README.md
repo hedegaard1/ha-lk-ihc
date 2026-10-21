@@ -198,12 +198,21 @@ imellem, så en automatisering kan vælge den bevægelse, den vil have, fra list
 venter aldrig. Skal enkelt- og dobbelttryk gøre hver sin ting, så brug `single_press` og
 `double_press` i stedet.
 
+### Taster som binære sensorer
+
+Kommer du fra IHC-betaens manuelle opsætning, er dine taster binære sensorer, der er tændt, mens
+tasten holdes nede, og automatiseringer og blueprints til dæmpning med én knap måler selv, hvor længe
+der holdes. Slå **Tryk på vægkontakter som binære sensorer** til, så får hver tast også en
+`binary_sensor` med samme navn som dens hændelse. Tilstanden hedder «Trykket ned» og «Sluppet».
+Skift automatiseringerne over til dem, og den gamle opsætning kan fjernes.
+
 ## Indstillinger
 
 | Indstilling | Hvad den gør |
 |---|---|
 | Skrivebeskyttet | Så længe den er slået til, sendes der aldrig en kommando til anlægget. |
 | Tryk på vægkontakter som hændelser | Opretter hændelses-entiteterne. Slå den fra for en kortere entitetsliste. |
+| Tryk på vægkontakter som binære sensorer | Opretter også en binær sensor pr. tast, tændt mens tasten holdes nede. Slået fra som standard. |
 
 Ændrer du en indstilling, genindlæses opsætningen. Det tager et sekund eller to og kræver ingen
 genstart.

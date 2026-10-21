@@ -1,4 +1,4 @@
-"""IHC binary sensors: movement, door contacts, smoke, water and the like."""
+"""IHC binary sensors: movement, door contacts, smoke, water and the like - and, as an option, the keys."""
 
 from __future__ import annotations
 
@@ -11,6 +11,7 @@ from homeassistant.util.enum import try_parse_enum
 
 from . import IHCConfigEntry
 from .catalog import ResourceRole
+from .const import CONF_BUTTONS_AS_BINARY_SENSORS, DEFAULT_BUTTONS_AS_BINARY_SENSORS
 from .entity import IHCEntity
 from .logicentity import IHCLogicEntity
 
@@ -33,6 +34,12 @@ async def async_setup_entry(
         for product, resource in data.project.resources
         if resource.role is ResourceRole.BINARY_SENSOR
     )
+    if entry.options.get(CONF_BUTTONS_AS_BINARY_SENSORS, DEFAULT_BUTTONS_AS_BINARY_SENSORS):
+        async_add_entities(
+            IHCButtonBinarySensor(data.connection, product, resource, controller_device_id=data.controller_device_id)
+            for product, resource in data.project.resources
+            if resource.role is ResourceRole.BUTTON
+        )
 
 
 class IHCBinarySensor(IHCEntity, BinarySensorEntity):
@@ -49,6 +56,32 @@ class IHCBinarySensor(IHCEntity, BinarySensorEntity):
     def _apply_value(self, value: Any) -> None:
         """Handle an on/off value, inverted for the products that report the opposite."""
         self._attr_is_on = not bool(value) if self._resource.inverting else bool(value)
+
+
+class IHCButtonBinarySensor(IHCEntity, BinarySensorEntity):
+    """One key on an IHC wall switch, on while it is held.
+
+    The same key as its event entity, seen the other way: the event says what kind of press it was,
+    this says whether the key is down right now. An automation that dims while a key is held, or a
+    blueprint that times the hold itself, needs the second. Both share the key's unique id, which
+    is fine - the registry keeps ids apart per domain.
+    """
+
+    _attr_is_on = False
+    # No device class fits a key - Home Assistant has none for a binary sensor - so the translation
+    # key is what marks it as one. It also names the states "Pressed" and "Released".
+    _attr_translation_key = "key"
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Name the entity after the key, falling back to its position on the product."""
+        super().__init__(*args, **kwargs)
+        if not self._resource.name:
+            self._attr_name = f"Key {self._resource.index}"
+
+    @callback
+    def _apply_value(self, value: Any) -> None:
+        """On while the key is down."""
+        self._attr_is_on = bool(value)
 
 
 class IHCFlagSensor(IHCLogicEntity, BinarySensorEntity):

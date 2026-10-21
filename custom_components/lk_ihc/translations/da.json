@@ -41,11 +41,13 @@
         "title": "IHC-indstillinger",
         "data": {
           "read_only": "Skrivebeskyttet",
-          "expose_buttons": "Tryk på vægkontakter som hændelser"
+          "expose_buttons": "Tryk på vægkontakter som hændelser",
+          "buttons_as_binary_sensors": "Tryk på vægkontakter som binære sensorer"
         },
         "data_description": {
           "read_only": "Så længe den er slået til, sender integrationen aldrig en kommando til anlægget. Enhederne viser stadig, hvad huset gør, og forsøg på at tænde eller slukke får en besked om hvorfor.",
-          "expose_buttons": "Opret en hændelsesenhed for hvert tryk på hver vægkontakt, så automatiseringer kan reagere på et tryk. Trykkene gør stadig det, anlægget allerede bruger dem til."
+          "expose_buttons": "Opret en hændelsesenhed for hvert tryk på hver vægkontakt, så automatiseringer kan reagere på et tryk. Trykkene gør stadig det, anlægget allerede bruger dem til.",
+          "buttons_as_binary_sensors": "Opret også en binær sensor for hver tast, som er tændt, mens tasten holdes nede. Så virker automatiseringer og blueprints, der er lavet til taster som binære sensorer - sådan som IHC-betaens manuelle opsætning viser dem - stadig. Trykkene gør stadig det, anlægget allerede bruger dem til."
         }
       }
     }
@@ -116,6 +118,14 @@
               "long_release": "Sluppet efter langt tryk"
             }
           }
+        }
+      }
+    },
+    "binary_sensor": {
+      "key": {
+        "state": {
+          "on": "Trykket ned",
+          "off": "Sluppet"
         }
       }
     }

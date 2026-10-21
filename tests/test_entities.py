@@ -31,6 +31,7 @@ RELAY = "switch.utility_room_universal_relay_on_the_wall"
 PIR = "binary_sensor.utility_room_pir_outside"
 TEMPERATURE = "sensor.utility_room_temperature_sensor_by_the_window"
 KEY_LEFT = "event.living_room_wall_switch_2_keys_by_the_terrace_door_key_left"
+KEY_LEFT_HELD = "binary_sensor.living_room_wall_switch_2_keys_by_the_terrace_door_key_left"
 
 LAMP_ID = 0x3001
 DIMMER_ID = 0x3002
@@ -199,3 +200,32 @@ async def test_buttons_can_be_left_out(hass: HomeAssistant, config_entry: MockCo
     await hass.async_block_till_done()
     assert hass.states.get(KEY_LEFT) is None
     assert hass.states.get(LAMP) is not None
+
+
+async def test_keys_are_not_binary_sensors_by_default(hass: HomeAssistant, setup_entry: MockConfigEntry):
+    """Without the option, a key is only an event entity."""
+    assert hass.states.get(KEY_LEFT) is not None
+    assert hass.states.get(KEY_LEFT_HELD) is None
+
+
+async def test_keys_as_binary_sensors(hass: HomeAssistant, config_entry: MockConfigEntry, fake_controller):
+    """With the option on, a key is also a binary sensor that is on while it is held."""
+    hass.config_entries.async_update_entry(
+        config_entry, options={"read_only": False, "expose_buttons": True, "buttons_as_binary_sensors": True}
+    )
+    assert await hass.config_entries.async_setup(config_entry.entry_id)
+    await hass.async_block_till_done()
+    controller = controller_of(config_entry)
+
+    assert hass.states.get(KEY_LEFT_HELD).state == STATE_OFF
+    controller.notify(KEY_LEFT_ID, True)
+    await hass.async_block_till_done()
+    assert hass.states.get(KEY_LEFT_HELD).state == STATE_ON
+    controller.notify(KEY_LEFT_ID, False)
+    await hass.async_block_till_done()
+    assert hass.states.get(KEY_LEFT_HELD).state == STATE_OFF
+
+    # The event entity is still there, and both carry the key's unique id in their own domain.
+    registry = er.async_get(hass)
+    assert registry.async_get(KEY_LEFT).unique_id == registry.async_get(KEY_LEFT_HELD).unique_id
+    assert hass.states.get(KEY_LEFT) is not None
